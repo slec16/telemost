@@ -2,9 +2,11 @@
     import { ref } from 'vue'
     import HelloWorld from './components/HelloWorld.vue'
 
+
+
     const theme = ref('light')
 
-    function onClick() {
+    const changeTheme = () => {
         theme.value = theme.value === 'light' ? 'dark' : 'light'
     }
 
@@ -18,7 +20,12 @@
 
         <v-app-bar title="App bar">
             <v-spacer></v-spacer>
-            <v-btn text="Toggle Theme" slim @click="onClick"></v-btn>
+            <v-btn
+                :prepend-icon="theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+                text=""
+                slim
+                @click="changeTheme"
+            ></v-btn>
         </v-app-bar>
 
         <v-navigation-drawer v-model="drawer" :rail="rail" permanent @click="rail = false">
