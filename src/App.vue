@@ -1,5 +1,5 @@
 <script setup>
-    import { computed, ref, watch } from 'vue'
+    import { computed, ref, watch, onMounted } from 'vue'
     import HelloWorld from './components/HelloWorld.vue'
     import ListOfUsers from './components/ListOfUsers.vue'
 
@@ -14,25 +14,41 @@
 
     const listSelected = ref("")
 
-    watch( listSelected, (newListSelected) => {
-        console.log(newListSelected)
-    } )
+    const userName = ref("")
 
-    const listOfUsers = ref([
-        {
-            name: "haha1",
-            id: 1
-        },
-        {
-            name: "haha2",
-            id: 2
+    const listOfUsers = ref([])
 
-        },
-        {
-            name: "haha3", 
-            id: 3
-        },
-    ])
+
+
+    const makeid = (length) => {
+        let result = '';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const charactersLength = characters.length;
+        let counter = 0;
+        while (counter < length) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            counter += 1;
+        }
+        return result;
+    }
+
+    onMounted(() => {
+        // console.log(makeid(5))
+        userName.value = makeid(5)
+    })
+
+    let myWs
+    myWs = new WebSocket('ws://localhost:9000');
+
+    myWs.addEventListener("open", (e) => {
+        myWs.send(JSON.stringify(userName.value))
+    })
+
+    myWs.addEventListener("message",async(e) => {
+        let message = JSON.parse(e.data)
+        if(message instanceof Array) listOfUsers.value = message
+    })
+    
 
 </script>
 
@@ -60,7 +76,7 @@
         <v-navigation-drawer v-model="drawer" :rail="rail" permanent >
             <v-list>
                 <v-list-item prepend-avatar="https://randomuser.me/api/portraits/men/88.jpg"
-                    title="John Leider">
+                    :title="userName">
                 </v-list-item>
             </v-list>
 

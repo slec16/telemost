@@ -7,14 +7,14 @@
         >
             <v-list-item 
                 v-for="(item, i) in listOfUsers" 
-                :key="item.id" 
-                :value="item.name"
+                :key="i" 
+                :value="item"
                 color="primary"
-                prepend-icon="mdi-home-city"
-                :disabled="item.name == selectedUser"
+                prepend-icon="mdi-account-circle"
+                :disabled="item == selectedUser"
             >
 
-                {{ item.name }}
+                {{ item }}
             </v-list-item>
         </v-list>
 
@@ -35,7 +35,7 @@
 
 
     watchEffect(() => {
-        console.log(rail)
+        console.log(listOfUsers)
     })
 
 
