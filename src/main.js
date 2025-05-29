@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import './style.css'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
@@ -10,6 +11,8 @@ import "@mdi/font/css/materialdesignicons.css";
 import "@fortawesome/fontawesome-free/css/all.css";
 
 import App from './App.vue'
+
+const pinia = createPinia()
 
 const vuetify = createVuetify({
   components,
@@ -23,4 +26,4 @@ const vuetify = createVuetify({
   },
 })
 
-createApp(App).use(vuetify).mount('#app')
+createApp(App).use(vuetify).use(pinia).mount('#app')
