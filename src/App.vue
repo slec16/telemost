@@ -2,6 +2,7 @@
     import { computed, ref, watch, onMounted, watchEffect } from 'vue'
     import HelloWorld from './components/HelloWorld.vue'
     import ListOfUsers from './components/ListOfUsers.vue'
+    import OnlineList from './components/OnlineList.vue'
 
     import { useSocketStore } from './stores/socket-store'
 
@@ -20,25 +21,35 @@
 
     const listSelected = ref("")
 
+    const selectedOnline = ref("")
+    watchEffect(() => {
+        console.log(selectedOnline)
+    })
+
     const userName = ref("")
 
     const userInfo = ref({})
 
-    
-    // watchEffect(() => {
-    //     console.log(userInfo.value)
-    // })
-
-
     const listOfUsers = ref([])
 
-    const authFunc = () => {
+    const signinFunc = () => {
         userInfo.value.name = userName.value
         userInfo.value.id = makeid(5)
-        console.log(userInfo.value)
+        socketStore.connectWs()
+        socketStore.openWs(userName.value)
+        socketStore.$subscribe((state) => {
+            if( state.events.target.recieveMessage ) listOfUsers.value = state.events.target.recieveMessage
+        })
+    }
+
+    const signoutFunc = () => {
+        socketStore.disconnectWs()
     }
 
 
+    const wsMassegeSubsFunc = (message) => {
+
+    }
 
 
 
@@ -72,8 +83,7 @@
 
 
 
-    // socketStore.connectWs()
-    // socketStore.openWs(userName.value)
+
 
 </script>
 
@@ -81,7 +91,7 @@
 <template>
     <v-app :theme="theme">
 
-        <v-app-bar title="App bar">
+        <v-app-bar title="Telemost">
             <template v-slot:prepend>
                 <v-btn
                     @click="rail = !rail"
@@ -100,6 +110,7 @@
                 width="auto"
             >
                 <v-card
+                    v-if="socketStore.socketState !== 1"
                     width="400"
                     prepend-icon="mdi-account-circle"
                     text="Введите ваше имя"
@@ -111,8 +122,26 @@
                             class="ms-auto"
                             text="Ok"
                             @click="() => {
+                                signinFunc()
+                                authDialog = false
+                            }"
+                        ></v-btn>
+                    </template>
+                </v-card>
+                <v-card
+                    v-else
+                    width="400"
+                    prepend-icon="mdi-account-circle"
+                    text="Выйти из аккаунта?"
+                    title="Выйти"
+                >
+                    <template v-slot:actions>
+                        <v-btn
+                            class="ms-auto"
+                            text="Ok"
+                            @click="() => {
                                 // console.log(userName)
-                                authFunc()
+                                signoutFunc()
                                 authDialog = false
                             }"
                         ></v-btn>
@@ -130,24 +159,29 @@
 
         <v-navigation-drawer location="left" v-model="drawer" :rail="rail" permanent >
             <v-list>
-                <v-list-item prepend-avatar="https://randomuser.me/api/portraits/men/88.jpg"
-                    :title="userName">
+                <v-list-item 
+                    :title="userName"
+                >
+                    <template v-slot:prepend>
+                        <v-badge :color="socketStore.socketState !== 1 ? 'error' : 'success'" dot>
+                            <v-icon icon="mdi-account-circle"></v-icon>
+                        </v-badge>
+                    </template>
                 </v-list-item>
             </v-list>
 
             <v-divider></v-divider>
 
             <v-list density="compact" nav v-model:selected='listSelected'>
-                <v-list-item prepend-icon="mdi-home-city" value="home">Home</v-list-item>
-                <v-list-item prepend-icon="mdi-account"  value="channels">Channels</v-list-item>
-                <v-list-item prepend-icon="mdi-account-group-outline" value="friends">Friends</v-list-item>
+                <v-list-item prepend-icon="mdi-home-city" value="home">Группы</v-list-item>
+                <v-list-item prepend-icon="mdi-account"  value="channels">Личные сообщения</v-list-item>
+                <v-list-item prepend-icon="mdi-account-group-outline" value="friends">Друзья</v-list-item>
             </v-list>
         </v-navigation-drawer>
 
         <template v-if="listSelected == 'friends'">
             <ListOfUsers 
                 :listOfUsers=listOfUsers
-                :rail=rail
             />
         </template>
 
@@ -160,10 +194,10 @@
 
             <v-divider></v-divider>
 
-            <v-list density="compact" nav v-model:selected='listSelected'>
-                <v-list-item prepend-icon="mdi-account" value="bim-bim">bim-bim</v-list-item>
-                <v-list-item prepend-icon="mdi-account"  value="bam-bam">bam-bam</v-list-item>
-                <v-list-item prepend-icon="mdi-account" value="boobs">boobs</v-list-item>
+            <v-list density="compact" nav v-model:selected='selectedOnline'>
+                <OnlineList
+                    :listOfUsers=listOfUsers
+                />
             </v-list>
         </v-navigation-drawer>
 

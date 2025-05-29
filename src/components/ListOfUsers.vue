@@ -1,6 +1,6 @@
 <template>
 
-    <v-navigation-drawer :rail="rail" permanent>
+    <v-navigation-drawer  permanent>
         <v-list 
             v-model:selected="selectedUser"
             
@@ -10,7 +10,7 @@
                 :key="i" 
                 :value="item"
                 color="primary"
-                prepend-icon="mdi-account-circle"
+                prepend-icon="mdi-account"
                 :disabled="item == selectedUser"
             >
 
@@ -27,16 +27,16 @@
 <script setup>
     import { computed, ref, watch, watchEffect, reactive } from 'vue'
 
-    const { listOfUsers, rail } = defineProps(["listOfUsers", "rail"])
+    const { listOfUsers } = defineProps(["listOfUsers"])
 
 
     const selectedUser = ref("")
 
 
 
-    watchEffect(() => {
-        console.log(listOfUsers)
-    })
+    // watchEffect(() => {
+    //     console.log(listOfUsers)
+    // })
 
 
 </script>
