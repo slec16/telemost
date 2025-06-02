@@ -164,7 +164,11 @@
             <v-divider></v-divider>
 
             <v-list density="compact" nav v-model:selected='listSelected'>
-                <v-list-item prepend-icon="mdi-home-city" value="home">Группы</v-list-item>
+                <RouterLink to="/groups">
+                    <v-list-item prepend-icon="mdi-home-city" value="home">
+                        Группы
+                    </v-list-item>
+                </RouterLink>
                 <v-list-item prepend-icon="mdi-account"  value="channels">Личные сообщения</v-list-item>
                 <v-list-item prepend-icon="mdi-account-group-outline" value="friends">Друзья</v-list-item>
             </v-list>
@@ -193,7 +197,6 @@
         </v-navigation-drawer>
 
         <v-main>
-            <!-- main content -->
             <RouterView />
         </v-main>
 

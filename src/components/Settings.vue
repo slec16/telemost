@@ -9,8 +9,12 @@
                 :key="i" 
                 :value="item"
                 color="primary"
+                class="p-0"
             >
-                <span class="pl-5">{{ item }}</span>
+                <RouterLink :to="item.route">
+                    <span class="pl-5">{{ item.title }}</span>
+                    <!-- {{ item.title }} -->
+                </RouterLink>
             </v-list-item>
 
             <v-divider></v-divider>
@@ -21,7 +25,6 @@
                 :key="i" 
                 :value="item"
                 color="primary"
-                class="ml-5"
             >
                 <span class="pl-5">{{ item }}</span>
             </v-list-item>
@@ -32,6 +35,7 @@
                 <v-btn
                     variant="plain"
                     color="error"
+                    :disabled="socketStore.socketState !== 1"
                 >
                     Выйти
                 </v-btn>
@@ -39,12 +43,23 @@
 
         </v-list>
     </v-navigation-drawer>
+
+    <RouterView />
 </template>
 
 
 <script setup>
 
+    import { useSocketStore } from '../stores/socket-store'
+
+    const socketStore = useSocketStore()
+
     const usersSettingsItems = ['Моя учетная запись', 'Конфиденциальность']
-    const appsSettingsItems = ['Голос и видео', 'Уведомления', 'Горячие клавиши', 'Внешний вид', 'Язык']
+    const appsSettingsItems = [{ title: 'Голос и видео', route: '/settings/media' },
+        { title: 'Уведомления', route: '/push' }, 
+        { title: 'Горячие клавиши', route: '/hotkey' }, 
+        { title: 'Внешний вид', route: '/view' }, 
+        { title: 'Язык', route: '/language' }
+    ]
 
 </script>
