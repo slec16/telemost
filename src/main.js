@@ -6,6 +6,7 @@ import { createVuetify } from 'vuetify'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import router from './router'
 
 import "@mdi/font/css/materialdesignicons.css"; 
 import "@fortawesome/fontawesome-free/css/all.css";
@@ -26,4 +27,8 @@ const vuetify = createVuetify({
   },
 })
 
-createApp(App).use(vuetify).use(pinia).mount('#app')
+createApp(App)
+  .use(vuetify)
+  .use(pinia)
+  .use(router)
+  .mount('#app')

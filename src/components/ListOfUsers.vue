@@ -1,6 +1,6 @@
 <template>
 
-    <v-navigation-drawer  permanent>
+    <v-navigation-drawer permanent>
         <v-list 
             v-model:selected="selectedUser"
             

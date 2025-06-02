@@ -5,14 +5,16 @@
     import OnlineList from './components/OnlineList.vue'
 
     import { useSocketStore } from './stores/socket-store'
+    import { useThemeStore } from './stores/theme-store'
 
     const socketStore = useSocketStore()
+    const themeStore = useThemeStore()
 
-    const theme = ref('light')
+    // const theme = ref('light')
     
-    const changeTheme = () => {
-        theme.value = theme.value === 'light' ? 'dark' : 'light'
-    }
+    // const changeTheme = () => {
+    //     theme.value = theme.value === 'light' ? 'dark' : 'light'
+    // }
 
     const drawer = ref(true)
     const rail = ref(true)
@@ -65,31 +67,12 @@
         return result;
     }
 
-    // onMounted(() => {
-    //     userName.value = makeid(5)
-    // })
-
-    // let myWs
-    // myWs = new WebSocket('ws://localhost:9000');
-
-    // myWs.addEventListener("open", (e) => {
-    //     myWs.send(JSON.stringify(userName.value))
-    // })
-
-    // myWs.addEventListener("message",async(e) => {
-    //     let message = JSON.parse(e.data)
-    //     if(message instanceof Array) listOfUsers.value = message
-    // })
-
-
-
-
 
 </script>
 
 
 <template>
-    <v-app :theme="theme">
+    <v-app :theme="themeStore.theme">
 
         <v-app-bar title="Telemost">
             <template v-slot:prepend>
@@ -150,10 +133,10 @@
             </v-dialog>
 
             <v-btn
-                :icon="theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
+                :icon="themeStore.theme === 'light' ? 'mdi-weather-sunny' : 'mdi-weather-night'"
                 text=""
                 slim
-                @click="changeTheme"
+                @click="() => themeStore.changeTheme()"
             ></v-btn>
         </v-app-bar>
 
@@ -166,6 +149,14 @@
                         <v-badge :color="socketStore.socketState !== 1 ? 'error' : 'success'" dot>
                             <v-icon icon="mdi-account-circle"></v-icon>
                         </v-badge>
+                    </template>
+                    <template v-slot:append>
+                        <RouterLink to="/settings">
+                            <v-btn
+                                size="x-small"
+                                icon="mdi-cog"
+                            ></v-btn>
+                        </RouterLink>
                     </template>
                 </v-list-item>
             </v-list>
@@ -202,7 +193,8 @@
         </v-navigation-drawer>
 
         <v-main>
-            main content
+            <!-- main content -->
+            <RouterView />
         </v-main>
 
     </v-app>
