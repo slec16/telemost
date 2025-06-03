@@ -11,7 +11,7 @@ import Chat from './components/Chat.vue'
 import Message from './components/Message.vue'
 import Groups from './components/Groups.vue'
 import Main from './components/Main.vue'
-import ListOfUsers from './components/ListOfUsers.vue'
+import Friends from './components/Friends.vue'
 
 const routes = [
     {
@@ -50,7 +50,7 @@ const routes = [
     },
     { 
         path: '/friends',
-        component: ListOfUsers,
+        component: Friends,
     },
     {   
         path: '/message',
@@ -59,6 +59,10 @@ const routes = [
     { 
         path: '/groups',
         component: Groups,
+    },
+    {
+        path: '/chat/:id',
+        component: Chat
     }
 
 ]

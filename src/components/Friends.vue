@@ -6,15 +6,16 @@
             
         >
             <v-list-item 
-                v-for="(item, i) in listOfUsers" 
+                v-for="(item, i) in listOfFriends" 
                 :key="i" 
                 :value="item"
                 color="primary"
                 prepend-icon="mdi-account"
                 :disabled="item == selectedUser"
+                :to='`chat/${item.id}`'
             >
 
-                {{ item }}
+                {{ item.name }}
             </v-list-item>
         </v-list>
 
@@ -27,8 +28,13 @@
 <script setup>
     import { computed, ref, watch, watchEffect, reactive } from 'vue'
 
-    const { listOfUsers } = defineProps(["listOfUsers"])
+    // const { listOfUsers } = defineProps(["listOfUsers"])
 
+    // fetch запрос для получения списка друзей
+    const listOfFriends = ref([{
+        name: 'Roma',
+        id: 1,
+    }])
 
     const selectedUser = ref("")
 

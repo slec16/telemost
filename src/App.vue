@@ -1,7 +1,7 @@
 <script setup>
     import { computed, ref, watch, onMounted, watchEffect } from 'vue'
     import HelloWorld from './components/HelloWorld.vue'
-    import ListOfUsers from './components/ListOfUsers.vue'
+    import ListOfUsers from './components/Friends.vue'
     import OnlineList from './components/OnlineList.vue'
 
     import { useSocketStore } from './stores/socket-store'
@@ -33,7 +33,7 @@ import { RouterLink } from 'vue-router'
 
     const userInfo = ref({})
 
-    const listOfUsers = ref([])
+    const listOfOnlineUsers = ref([])
 
     const signinFunc = () => {
         userInfo.value.name = userName.value
@@ -41,7 +41,7 @@ import { RouterLink } from 'vue-router'
         socketStore.connectWs()
         socketStore.openWs(userName.value)
         socketStore.$subscribe((state) => {
-            if( state.events.target.recieveMessage ) listOfUsers.value = state.events.target.recieveMessage
+            if( state.events.target.recieveMessage ) listOfOnlineUsers.value = state.events.target.recieveMessage
         })
     }
 
@@ -200,7 +200,7 @@ import { RouterLink } from 'vue-router'
 
             <v-list density="compact" nav v-model:selected='selectedOnline'>
                 <OnlineList
-                    :listOfUsers=listOfUsers
+                    :listOfUsers=listOfOnlineUsers
                 />
             </v-list>
         </v-navigation-drawer>
