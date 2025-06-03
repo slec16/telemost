@@ -10,11 +10,9 @@
                 :value="item"
                 color="primary"
                 class="p-0"
+                :to="item.route"
             >
-                <RouterLink :to="item.route">
-                    <span class="pl-5">{{ item.title }}</span>
-                    <!-- {{ item.title }} -->
-                </RouterLink>
+                <span class="pl-5">{{ item.title }}</span>
             </v-list-item>
 
             <v-divider></v-divider>
@@ -25,8 +23,9 @@
                 :key="i" 
                 :value="item"
                 color="primary"
+                :to="item.route"
             >
-                <span class="pl-5">{{ item }}</span>
+                <span class="pl-5">{{ item.title }}</span>
             </v-list-item>
 
             <v-divider></v-divider>
@@ -50,16 +49,16 @@
 
 <script setup>
 
-    import { useSocketStore } from '../stores/socket-store'
+    import { useSocketStore } from '../../stores/socket-store'
 
     const socketStore = useSocketStore()
 
-    const usersSettingsItems = ['Моя учетная запись', 'Конфиденциальность']
-    const appsSettingsItems = [{ title: 'Голос и видео', route: '/settings/media' },
-        { title: 'Уведомления', route: '/push' }, 
-        { title: 'Горячие клавиши', route: '/hotkey' }, 
-        { title: 'Внешний вид', route: '/view' }, 
-        { title: 'Язык', route: '/language' }
+    const usersSettingsItems = [{title: 'Моя учетная запись', route: '/settings/account'}, {title: 'Конфиденциальность', route: '/settings/conf'}]
+    const appsSettingsItems = [
+        { title: 'Голос и видео', route: '/settings/media' },
+        { title: 'Уведомления', route: '/settings/push' }, 
+        { title: 'Внешний вид', route: '/settings/view' }, 
+        { title: 'Язык', route: '/settings/language' }
     ]
 
 </script>

@@ -6,6 +6,7 @@
 
     import { useSocketStore } from './stores/socket-store'
     import { useThemeStore } from './stores/theme-store'
+import { RouterLink } from 'vue-router'
 
     const socketStore = useSocketStore()
     const themeStore = useThemeStore()
@@ -169,16 +170,24 @@
                         Группы
                     </v-list-item>
                 </RouterLink>
-                <v-list-item prepend-icon="mdi-account"  value="channels">Личные сообщения</v-list-item>
-                <v-list-item prepend-icon="mdi-account-group-outline" value="friends">Друзья</v-list-item>
+                <RouterLink to="/message">
+                    <v-list-item prepend-icon="mdi-account"  value="channels">
+                        Личные сообщения
+                    </v-list-item>
+                </RouterLink>
+                <RouterLink to="/friends">
+                    <v-list-item prepend-icon="mdi-account-group-outline" value="friends">
+                        Друзья
+                    </v-list-item>
+                </RouterLink>
             </v-list>
         </v-navigation-drawer>
 
-        <template v-if="listSelected == 'friends'">
+        <!-- <template v-if="listSelected == 'friends'">
             <ListOfUsers 
                 :listOfUsers=listOfUsers
             />
-        </template>
+        </template> -->
 
         <v-navigation-drawer location="right">
              <v-list>

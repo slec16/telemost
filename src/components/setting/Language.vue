@@ -1,0 +1,3 @@
+<template>
+    Language component
+</template>

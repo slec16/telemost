@@ -1,0 +1,3 @@
+<template>
+    Push component
+</template>

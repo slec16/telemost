@@ -19,7 +19,7 @@
         </v-list>
 
     </v-navigation-drawer>
-
+    <div>Friends component</div>
 
 </template>
 
