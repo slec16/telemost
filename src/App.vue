@@ -25,9 +25,10 @@ import { RouterLink } from 'vue-router'
     const listSelected = ref("")
 
     const selectedOnline = ref("")
-    watchEffect(() => {
-        console.log(selectedOnline)
-    })
+
+    // watchEffect(() => {
+    //     console.log(listSelected.value)
+    // })
 
     const userName = ref("")
 
@@ -154,6 +155,7 @@ import { RouterLink } from 'vue-router'
                     <template v-slot:append>
                         <RouterLink to="/settings">
                             <v-btn
+                                @click="listSelected = '' "
                                 size="x-small"
                                 icon="mdi-cog"
                             ></v-btn>
@@ -166,17 +168,17 @@ import { RouterLink } from 'vue-router'
 
             <v-list density="compact" nav v-model:selected='listSelected'>
                 <RouterLink to="/groups">
-                    <v-list-item prepend-icon="mdi-home-city" value="home">
+                    <v-list-item prepend-icon="mdi-account-group" value="home">
                         Группы
                     </v-list-item>
                 </RouterLink>
                 <RouterLink to="/message">
-                    <v-list-item prepend-icon="mdi-account"  value="channels">
+                    <v-list-item prepend-icon="mdi-message-outline"  value="channels">
                         Личные сообщения
                     </v-list-item>
                 </RouterLink>
                 <RouterLink to="/friends">
-                    <v-list-item prepend-icon="mdi-account-group-outline" value="friends">
+                    <v-list-item prepend-icon="mdi-account" value="friends">
                         Друзья
                     </v-list-item>
                 </RouterLink>

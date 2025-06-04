@@ -1,5 +1,5 @@
 <template>
-    <v-navigation-drawer>
+    <v-navigation-drawer permanent>
         <v-list>
 
             <v-list-item class="font-bold" >Настройки приложения</v-list-item>
