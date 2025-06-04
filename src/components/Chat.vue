@@ -18,7 +18,7 @@
                         variant="plain"
                         icon="mdi-plus"
                     ></v-btn>
-                    <v-divider vertical class="ml-1"></v-divider>
+                    <v-divider vertical class="ml-3"></v-divider>
                 </template>
 
                 <template v-slot:append-inner>
@@ -30,7 +30,7 @@
                         variant="plain"
                         icon="mdi-emoticon-cool-outline"
                     ></v-btn>
-                    <v-divider vertical class="mx-1"></v-divider>
+                    <v-divider vertical class="mx-3"></v-divider>
                     <v-btn
                         color="secondary"
                         variant="plain"
