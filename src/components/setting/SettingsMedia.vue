@@ -73,7 +73,7 @@
         </div>
 
     </div>
-    <div class="h-full w-full flex items-center justify-center">
+    <div v-else class="h-full w-full flex items-center justify-center">
         <v-icon class="animate-spin" size="50" icon="mdi-loading"></v-icon>
     </div>
 
