@@ -4,23 +4,22 @@
         <div class="grid grid-cols-2 grid-row-2 gap-2">
             <div class="px-7">
                 <p class="mb-2">Устройство ввода</p>
-                <v-select
-                    class="w-full"
+                <v-combobox
                     :items="audioInputDevices"
                     variant="outlined"
                     density="comfortable"
                     v-model='selectedAudioInput'
-                ></v-select>
+                ></v-combobox>
             </div>
             <div class="px-7">
                 <p class="mb-2">Устройство вывода</p>
-                <v-select
+                <v-combobox
                     class="w-full"
                     :items="audioOutputDevices"
                     variant="outlined"
                     density="comfortable"
                     v-model="selectedAudioOutput"
-                ></v-select>
+                ></v-combobox>
             </div>
             <div class="px-7">
                 <p>Громкость микрофона</p> 
@@ -41,23 +40,38 @@
                     ></v-slider>
             </div>
         </div>
+
+        <div>
+            <p>Чувствительность микрофона</p>
+            <div>
+                <!--TODO -->
+                <!-- полоска реагирующая на звук + возможность записи голоса и его прослушивания  -->
+                <v-slider
+                    v-model="sensitivityValue"
+                    color="yellow"
+                    min="0"
+                    max="1"
+                ></v-slider>
+            </div>
+        </div>
         <v-divider class="my-5"></v-divider>
         <p class="font-bold mb-5">Настройки видео</p>
         <div class="grid grid-cols-2 grid-row-1 gap-2">
             <div class="px-7">
                 <p class="mb-2">Камера</p>
-                <v-select
+                <v-combobox
                     class="w-full"
                     :items="videoInputDevice"
                     variant="outlined"
                     density="comfortable"
                     v-model="selectedVideoInput"
-                ></v-select>
+                ></v-combobox>
             </div>
             <div class="px-7">
                 <p class="mb-2">Предпросмотр</p>
                 <div class="group border rounded-lg w-full min-h-40 flex items-center justify-center">
-                    <video ref="check-video-ref" v-show="checkVideo"></video>
+                    <!-- TODO ограничить размеры окна видео -->
+                    <video ref="check-video-ref" class="rounded-md" v-show="checkVideo"></video>
                     <v-btn v-if="!checkVideo" @click="checkVideoHandler">
                         Проверить камеру
                     </v-btn>
@@ -81,6 +95,9 @@
 
 <script setup>
     import { ref, onMounted, watchEffect, useTemplateRef } from "vue"
+    import { useMediaStore } from "../../stores/media-store"
+    
+    const mediaStore = useMediaStore()
 
     const promise = ref(false)
 
@@ -88,8 +105,10 @@
 
     const checkVideo = ref(false)
 
-    const microVolume = ref(0)
-    const soundVolume = ref(1)
+    const microVolume = ref(0.5)
+    const soundVolume = ref(0.5)
+
+    const sensitivityValue = ref(0.75)
 
     const audioInputDevices = ref([])
     const audioOutputDevices = ref([])
@@ -100,157 +119,203 @@
     const selectedVideoInput = ref({})
 
 
-    watchEffect(() => {
-
-        // console.log(microVolume.value)
-        // console.log(soundVolume.value)
-        //в стору значения (через троттл)
-
-    })
 
     const checkVideoHandler = async () => {
-        const stream = await getMediaStream( { audio: false, video: true } );
+        const stream = await getMediaStream( { audio: false, video: true } )
         console.log(stream)
             if (stream) {
             checkVideo.value = true
-            videoRef.value.srcObject = stream;
+            videoRef.value.srcObject = stream
             // Optionally, add event listeners for more control:
             videoRef.value.onloadedmetadata = () => {
             videoRef.value.play(); // Start playing the video
-            };
+            }
         } else {
             // Handle the case where the stream could not be obtained, e.g., show an error message
-            console.error("Failed to get stream.");
+            console.error("Failed to get stream.")
         }
     }
 
     const stopCheckVideoHandler = () => {
         if (videoRef.value.srcObject) {
             checkVideo.value = false
-            const stream = videoRef.value.srcObject;
-            const tracks = stream.getTracks();
-            tracks.forEach(track => track.stop());
-            videoRef.value.srcObject = null; // Clear the source object
+            const stream = videoRef.value.srcObject
+            const tracks = stream.getTracks()
+            tracks.forEach(track => track.stop())
+            videoRef.value.srcObject = null
         }
     }
  
     const getMediaStream = async ( constraints ) => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia( constraints );
-            return stream;
+            const stream = await navigator.mediaDevices.getUserMedia( constraints )
+            return stream
         } catch (err) {
-            console.error( "Error accessing media devices:", err );
-            return null; 
+            console.error( "Error accessing media devices:", err )
+            return null
         }
 
     }
 
-    // const setupVideo = async() => {
-    //     const stream = await getMediaStream( { audio: false, video: true } );
 
-    //     if( !stream ) return
 
-    //     const videoTracks = stream.getVideoTracks()
+    const enumerateDevices = async() => {
 
-    // }
+        const streams = await getMediaStream( { audio: true, video: true } )
+        streams.getTracks().forEach( ( track ) => {
+            track.stop()
+        } )
 
-    const setupAudio = async() => {
-        const stream = await getMediaStream( { audio: true, video: false } );
+        const devices = await navigator.mediaDevices.enumerateDevices()
+
+        // 
+        devices.forEach((device) => {
+            if( device.kind == 'audioinput' ) {
+                audioInputDevices.value.push({
+                    title: device.label,
+                    value: device,
+                })
+                if(device.label.includes("умолчанию")) {
+                    selectedAudioInput.value = {
+                        title: device.label,
+                        value: device
+                    }
+                }
+
+            } else if( device.kind ==  'audiooutput' ) {
+                audioOutputDevices.value.push({
+                    title: device.label,
+                    value: device
+                })
+                if(device.label.includes("умолчанию")) {
+                    selectedAudioOutput.value = {
+                        title: device.label,
+                        value: device
+                    }
+                }
+            } else if( device.kind == 'videoinput' ) {
+                videoInputDevice.value.push({
+                    title: device.label,
+                    value: device
+                })
+            }
+        })
+
+        selectedVideoInput.value = {
+            ...videoInputDevice.value[0]
+        }
+
+        promise.value = true
+
+    }
+
+
+
+    const setupAudio = async( selectedInputDevice, selectedOutputDevice ) => {
+        
+        // console.log(selectedInputDevice , selectedOutputDevice )
+
+        if( selectedInputDevice == undefined || selectedOutputDevice == undefined ) return
+
+        const stream = await getMediaStream( { audio: { deviceId: { exact: selectedInputDevice.deviceId } }, video: false } )
 
         if( !stream ) return
 
-        const audioTracks = stream.getAudioTracks();
+        const audioTracks = stream.getAudioTracks()
 
         if (audioTracks.length === 0) {
-            console.warn("No audio tracks found.");
-            return;
+            console.warn("No audio tracks found.")
+            return
         }
 
         const audioContext = new window.AudioContext();
-        const source = audioContext.createMediaStreamSource(stream); 
-        const gainNode = audioContext.createGain(); 
+        const source = audioContext.createMediaStreamSource(stream);
+        const gainNode = audioContext.createGain()
 
         source.connect(gainNode); // Connect the source to the gain node
         gainNode.connect(audioContext.destination); // Connect the gain node to the output (speakers)
 
+
+        console.log("setup func")
         microVolume.value = gainNode.gain.value //current value state
 
-        stream.getTracks().forEach(track => track.stop());
+
+        stream.getTracks().forEach(track => track.stop())
+
     } 
 
-    const setMicroVolume = ( value ) => {
+    // const setMicroVolume = async( value, selectedInputDevice ) => {
 
+    //     if( selectedInputDevice == undefined ) return
+    //     const stream = await getMediaStream( { audio: { deviceId: { exact: selectedInputDevice.deviceId } }, video: false } )
+    //     if( !stream ) return
+
+    //     const audioTracks = stream.getAudioTracks()
+
+    //     if (audioTracks.length === 0) {
+    //         console.warn("No audio tracks found.")
+    //         return
+    //     }
+        
+    //     const audioContext = new window.AudioContext()
+    //     const source = audioContext.createMediaStreamSource(stream)
+    //     const gainNode = audioContext.createGain()
+
+    //     source.connect(gainNode); // Connect the source to the gain node
+    //     gainNode.connect(audioContext.destination); // Connect the gain node to the output (speakers)
+
+    //     gainNode.gain.value = value
+
+    //     stream.getTracks().forEach(track => track.stop())
+        
+    // }
+
+    const setMicroVolume = ( value, selectedInputDevice ) => {  
+        if( selectedInputDevice == undefined ) return
+
+        mediaStore.audioInputDevice = selectedInputDevice
+        console.log(selectedInputDevice)
+        mediaStore.volumeInput = value
     }
-    
 
-    const enumerateDevice = async () => {
 
-        navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-            .then(function(stream) {
+    const setSoundVolume = ( value, selectedOutputDevice ) => {  
+        if( selectedOutputDevice == undefined ) return
 
-                stream.getTracks().forEach(track =>{
-                    // console.log(track)
-                     track.stop()
-                });
-
-                navigator.mediaDevices.enumerateDevices()
-                .then(function(devices) {
-                    promise.value = true
-                    devices.forEach((device) => {
-                        if( device.kind == 'audioinput' ) {
-                            audioInputDevices.value.push({
-                                ...device,
-                                title: device.label,
-                                value: device.deviceId
-                            })
-                            if(device.label.includes("умолчанию")) {
-                                selectedAudioInput.value = {
-                                    ...device,
-                                    title: device.label,
-                                    value: device.deviceId
-                                }
-                            }
-
-                        } else if( device.kind ==  'audiooutput' ) {
-                            audioOutputDevices.value.push({
-                                ...device,
-                                title: device.label,
-                                value: device.deviceId
-                            })
-                            if(device.label.includes("умолчанию")) {
-                                selectedAudioOutput.value = {
-                                    ...device,
-                                    title: device.label,
-                                    value: device.deviceId
-                                }
-                            }
-                        } else if( device.kind == 'videoinput' ) {
-                            videoInputDevice.value.push({
-                                ...device,
-                                title: device.label,
-                                value: device.deviceId
-                            })
-                        }
-                    })
-                    selectedVideoInput.value = {
-                        ...videoInputDevice.value[0]
-                    }
-                })
-                .catch(function(err) {
-                    console.log("Ошибка при перечислении устройств: " + err.name + ": " + err.message);
-                });
-            })
-            .catch(function(err) {
-                console.log("Ошибка при получении доступа к устройствам: " + err.name + ": " + err.message);
-                // Обработка отказа в разрешении
-            });
-
+        mediaStore.audioOutputDevice.value = selectedOutputDevice
+        console.log(selectedOutputDevice)
+        mediaStore.volumeOutput = value
     }
+
+    watchEffect(( ) => {
+        console.log(selectedAudioInput.value)
+    })
+    // watchEffect(() => {
+
+    //     // в стору значения (через троттл)
+
+    //     // просто собирать значения с инпутов и записывать их в строру
+    //     // при создании wrtc забирать из сторы эти параметры и применять их
+
+    //     setMicroVolume( microVolume.value, selectedAudioInput.value )
+    // })
+
+    // watchEffect(() => {
+    //     setSoundVolume( soundVolume.value, selectedAudioOutput.value )
+    // })
+
+    // watchEffect(() => {
+    //     mediaStore.videoDevice = selectedVideoInput.value
+    // })
+
+
+
 
     onMounted( () => {
-        enumerateDevice()
-        setupAudio()
-        // setupVideo()
+
+        enumerateDevices()
+
+        
     })
         
 </script>

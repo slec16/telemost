@@ -1,11 +1,16 @@
 <template>
     <div class="flex flex-col h-full">
 
-        <div class="border-b flex flex-row h-fit py-3 w-full">
-            <strong>Current route path:</strong> {{ $route.fullPath }}
+        <div class="border-b flex flex-row h-fit py-3 w-full justify-between">
             <div>
-                User {{ $route.params.id }}
+                Current route path:{{ $route.fullPath }}  User {{ $route.params.id }}
             </div>
+            <v-btn
+                color="secondary"
+                variant="plain"
+                icon="mdi-phone"
+                @click="console.log(mediaStore.videoDevice)"
+        ></v-btn>
         </div>
         <div class="h-full">chat zone</div>
         <div class="h-fit px-5 py-3 border-t">
@@ -44,6 +49,9 @@
 </template>
 
 <script setup>
+    import { useMediaStore } from "../stores/media-store"
+
+    const mediaStore = useMediaStore()
 
 
 
