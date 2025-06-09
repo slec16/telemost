@@ -211,6 +211,5 @@ import { RouterLink } from 'vue-router'
         <v-main>
             <RouterView />
         </v-main>
-
     </v-app>
 </template>

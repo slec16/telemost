@@ -42,13 +42,15 @@
         </div>
 
         <div>
-            <p>Чувствительность микрофона</p>
-            <div>
+            <p class="font-bold mb-5">Проверка микрофона</p>
+            <div class="flex flex-row px-7">
+                <v-btn v-if="true" color="primary" class="mr-10">Проверить</v-btn>
+                <v-btn v-else class="mr-10">Воспроизвести</v-btn>
                 <!--TODO -->
                 <!-- полоска реагирующая на звук + возможность записи голоса и его прослушивания  -->
                 <v-slider
                     v-model="sensitivityValue"
-                    color="yellow"
+                    color="green"
                     min="0"
                     max="1"
                 ></v-slider>
@@ -237,8 +239,7 @@
 
     const setMicroVolume = async( value, selectedInputDevice ) => {
 
-        console.log(selectedInputDevice)
-        console.log(value)
+ 
         mediaStore.volumeInput = value
 
         if( selectedInputDevice == undefined ) return
@@ -264,11 +265,6 @@
         stream.getTracks().forEach(track => track.stop())
         
     }
-
-    // const setMicroVolume = ( ) => {  
-    //     // изменить gainNode 
-    //     // записать в стору
-    // }
 
 
     watchEffect(() => {
