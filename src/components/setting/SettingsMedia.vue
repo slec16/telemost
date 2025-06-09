@@ -134,7 +134,7 @@
             videoRef.value.srcObject = stream
             // Optionally, add event listeners for more control:
             videoRef.value.onloadedmetadata = () => {
-            videoRef.value.play(); // Start playing the video
+            videoRef.value.play() // Start playing the video
             }
         } else {
             // Handle the case where the stream could not be obtained, e.g., show an error message
@@ -239,6 +239,7 @@
 
         console.log(selectedInputDevice)
         console.log(value)
+        mediaStore.volumeInput = value
 
         if( selectedInputDevice == undefined ) return
         const stream = await getMediaStream( { audio: { deviceId: { exact: selectedInputDevice.deviceId } }, video: false } )
@@ -311,6 +312,11 @@
         }
 
         // volume input
+        if( mediaStore.volumeInput !== null ) {
+            microVolume.value = mediaStore.volumeInput
+        } else {
+            microVolume.value = 0.5
+        }
 
         if( mediaStore.volumeOutput !== null ) {
             soundVolume.value = mediaStore.volumeOutput

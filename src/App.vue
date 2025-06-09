@@ -76,14 +76,15 @@ import { RouterLink } from 'vue-router'
 <template>
     <v-app :theme="themeStore.theme">
 
-        <v-app-bar title="Telemost">
+        <v-app-bar >
             <template v-slot:prepend>
                 <v-btn
                     @click="rail = !rail"
                     prepend-icon='mdi-format-list-bulleted'
                 ></v-btn>
             </template>
-
+            <span class="text-teal-400 text-2xl">Tele</span>
+            <span class="text-2xl">most</span>
             <v-spacer></v-spacer>
             <v-btn
                 @click="authDialog = true"

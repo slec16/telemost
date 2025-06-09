@@ -9,7 +9,7 @@
                 color="secondary"
                 variant="plain"
                 icon="mdi-phone"
-                @click="console.log(mediaStore.volumeOutput)"
+                @click="console.log(mediaStore.volumeInput, mediaStore.audioInputDevice)"
         ></v-btn>
         </div>
         <div class="h-full">chat zone</div>
