@@ -4,22 +4,22 @@
         <div class="grid grid-cols-2 grid-row-2 gap-2">
             <div class="px-7">
                 <p class="mb-2">Устройство ввода</p>
-                <v-combobox
-                    :items="audioInputDevices"
+                <v-select
+                    :items="audioInputLabels"
                     variant="outlined"
                     density="comfortable"
                     v-model='selectedAudioInput'
-                ></v-combobox>
+                ></v-select>
             </div>
             <div class="px-7">
                 <p class="mb-2">Устройство вывода</p>
-                <v-combobox
+                <v-select
                     class="w-full"
-                    :items="audioOutputDevices"
+                    :items="audioOutputLabels"
                     variant="outlined"
                     density="comfortable"
                     v-model="selectedAudioOutput"
-                ></v-combobox>
+                ></v-select>
             </div>
             <div class="px-7">
                 <p>Громкость микрофона</p> 
@@ -59,13 +59,13 @@
         <div class="grid grid-cols-2 grid-row-1 gap-2">
             <div class="px-7">
                 <p class="mb-2">Камера</p>
-                <v-combobox
+                <v-select
                     class="w-full"
-                    :items="videoInputDevice"
+                    :items="videoInputLabels"
                     variant="outlined"
                     density="comfortable"
                     v-model="selectedVideoInput"
-                ></v-combobox>
+                ></v-select>
             </div>
             <div class="px-7">
                 <p class="mb-2">Предпросмотр</p>
@@ -96,6 +96,7 @@
 <script setup>
     import { ref, onMounted, watchEffect, useTemplateRef } from "vue"
     import { useMediaStore } from "../../stores/media-store"
+    import { throttle } from "../../utils/throttle"
     
     const mediaStore = useMediaStore()
 
@@ -105,18 +106,23 @@
 
     const checkVideo = ref(false)
 
-    const microVolume = ref(0.5)
-    const soundVolume = ref(0.5)
+    const microVolume = ref(null)
+    const soundVolume = ref(null)
 
     const sensitivityValue = ref(0.75)
 
     const audioInputDevices = ref([])
-    const audioOutputDevices = ref([])
-    const videoInputDevice = ref([])
+    const audioInputLabels = ref([])
 
-    const selectedAudioInput = ref({})
-    const selectedAudioOutput = ref({})
-    const selectedVideoInput = ref({})
+    const audioOutputDevices = ref([])
+    const audioOutputLabels = ref([])
+
+    const videoInputDevice = ref([])
+    const videoInputLabels = ref([])
+
+    const selectedAudioInput = ref('')
+    const selectedAudioOutput = ref('')
+    const selectedVideoInput = ref('')
 
 
 
@@ -157,8 +163,6 @@
 
     }
 
-
-
     const enumerateDevices = async() => {
 
         const streams = await getMediaStream( { audio: true, video: true } )
@@ -169,41 +173,28 @@
         const devices = await navigator.mediaDevices.enumerateDevices()
 
         // 
-        devices.forEach((device) => {
+        devices.forEach( ( device ) => {
             if( device.kind == 'audioinput' ) {
-                audioInputDevices.value.push({
-                    title: device.label,
-                    value: device,
-                })
-                if(device.label.includes("умолчанию")) {
-                    selectedAudioInput.value = {
-                        title: device.label,
-                        value: device
-                    }
-                }
+
+                audioInputDevices.value.push( device )
+                audioInputLabels.value.push( device.label )
 
             } else if( device.kind ==  'audiooutput' ) {
-                audioOutputDevices.value.push({
-                    title: device.label,
-                    value: device
-                })
-                if(device.label.includes("умолчанию")) {
-                    selectedAudioOutput.value = {
-                        title: device.label,
-                        value: device
-                    }
-                }
+
+                audioOutputDevices.value.push( device )
+                audioOutputLabels.value.push( device.label )
+
             } else if( device.kind == 'videoinput' ) {
-                videoInputDevice.value.push({
-                    title: device.label,
-                    value: device
-                })
+
+                videoInputDevice.value.push( device )
+                videoInputLabels.value.push( device.label )
+
             }
         })
 
-        selectedVideoInput.value = {
-            ...videoInputDevice.value[0]
-        }
+        if( selectedAudioInput.value === '' ) selectedAudioInput.value = audioInputLabels.value[0]
+        if( selectedAudioOutput.value === '' ) selectedAudioOutput.value = audioOutputLabels.value[0]
+        if( selectedVideoInput.value === '' ) selectedVideoInput.value = videoInputLabels.value[0]
 
         promise.value = true
 
@@ -211,43 +202,14 @@
 
 
 
-    const setupAudio = async( selectedInputDevice, selectedOutputDevice ) => {
+    // const setupAudio = async( selectedInputDevice, selectedOutputDevice ) => {
         
-        // console.log(selectedInputDevice , selectedOutputDevice )
+    //     // console.log(selectedInputDevice , selectedOutputDevice )
 
-        if( selectedInputDevice == undefined || selectedOutputDevice == undefined ) return
+    //     if( selectedInputDevice == undefined || selectedOutputDevice == undefined ) return
 
-        const stream = await getMediaStream( { audio: { deviceId: { exact: selectedInputDevice.deviceId } }, video: false } )
-
-        if( !stream ) return
-
-        const audioTracks = stream.getAudioTracks()
-
-        if (audioTracks.length === 0) {
-            console.warn("No audio tracks found.")
-            return
-        }
-
-        const audioContext = new window.AudioContext();
-        const source = audioContext.createMediaStreamSource(stream);
-        const gainNode = audioContext.createGain()
-
-        source.connect(gainNode); // Connect the source to the gain node
-        gainNode.connect(audioContext.destination); // Connect the gain node to the output (speakers)
-
-
-        console.log("setup func")
-        microVolume.value = gainNode.gain.value //current value state
-
-
-        stream.getTracks().forEach(track => track.stop())
-
-    } 
-
-    // const setMicroVolume = async( value, selectedInputDevice ) => {
-
-    //     if( selectedInputDevice == undefined ) return
     //     const stream = await getMediaStream( { audio: { deviceId: { exact: selectedInputDevice.deviceId } }, video: false } )
+
     //     if( !stream ) return
 
     //     const audioTracks = stream.getAudioTracks()
@@ -256,65 +218,107 @@
     //         console.warn("No audio tracks found.")
     //         return
     //     }
-        
-    //     const audioContext = new window.AudioContext()
-    //     const source = audioContext.createMediaStreamSource(stream)
+
+    //     const audioContext = new window.AudioContext();
+    //     const source = audioContext.createMediaStreamSource(stream);
     //     const gainNode = audioContext.createGain()
 
     //     source.connect(gainNode); // Connect the source to the gain node
     //     gainNode.connect(audioContext.destination); // Connect the gain node to the output (speakers)
 
-    //     gainNode.gain.value = value
+
+    //     console.log("setup func")
+    //     microVolume.value = gainNode.gain.value //current value state
+
 
     //     stream.getTracks().forEach(track => track.stop())
+
+    // } 
+
+    const setMicroVolume = async( value, selectedInputDevice ) => {
+
+        console.log(selectedInputDevice)
+        console.log(value)
+
+        if( selectedInputDevice == undefined ) return
+        const stream = await getMediaStream( { audio: { deviceId: { exact: selectedInputDevice.deviceId } }, video: false } )
+        if( !stream ) return
+
+        const audioTracks = stream.getAudioTracks()
+
+        if (audioTracks.length === 0) {
+            console.warn("No audio tracks found.")
+            return
+        }
         
+        const audioContext = new window.AudioContext()
+        const source = audioContext.createMediaStreamSource(stream)
+        const gainNode = audioContext.createGain()
+
+        source.connect(gainNode); // Connect the source to the gain node
+        gainNode.connect(audioContext.destination); // Connect the gain node to the output (speakers)
+
+        gainNode.gain.value = value
+
+        stream.getTracks().forEach(track => track.stop())
+        
+    }
+
+    // const setMicroVolume = ( ) => {  
+    //     // изменить gainNode 
+    //     // записать в стору
     // }
 
-    const setMicroVolume = ( value, selectedInputDevice ) => {  
-        if( selectedInputDevice == undefined ) return
 
-        mediaStore.audioInputDevice = selectedInputDevice
-        console.log(selectedInputDevice)
-        mediaStore.volumeInput = value
-    }
-
-
-    const setSoundVolume = ( value, selectedOutputDevice ) => {  
-        if( selectedOutputDevice == undefined ) return
-
-        mediaStore.audioOutputDevice.value = selectedOutputDevice
-        console.log(selectedOutputDevice)
-        mediaStore.volumeOutput = value
-    }
-
-    watchEffect(( ) => {
-        console.log(selectedAudioInput.value)
+    watchEffect(() => {
+        const currentDevice = audioInputDevices.value.find( el => el.label === selectedAudioInput.value)
+        if( currentDevice == undefined ) return
+        mediaStore.audioInputDevice = currentDevice
     })
-    // watchEffect(() => {
 
-    //     // в стору значения (через троттл)
+    watchEffect(() => {
+        const currentDevice = audioOutputDevices.value.find( el => el.label === selectedAudioOutput.value)
+        if( currentDevice == undefined ) return
+        mediaStore.audioOutputDevice = currentDevice
+    })
 
-    //     // просто собирать значения с инпутов и записывать их в строру
-    //     // при создании wrtc забирать из сторы эти параметры и применять их
+    watchEffect(() => {
+        const currentDevice = videoInputDevice.value.find( el => el.label === selectedVideoInput.value)
+        if( currentDevice == undefined ) return
+        mediaStore.videoDevice = currentDevice
+    })
 
-    //     setMicroVolume( microVolume.value, selectedAudioInput.value )
-    // })
+    watchEffect(() => {
+        if( microVolume.value === null ) return
+        setMicroVolume( microVolume.value, mediaStore.audioInputDevice )
+    })
 
-    // watchEffect(() => {
-    //     setSoundVolume( soundVolume.value, selectedAudioOutput.value )
-    // })
-
-    // watchEffect(() => {
-    //     mediaStore.videoDevice = selectedVideoInput.value
-    // })
-
-
-
+    watchEffect(() => {
+        if( soundVolume.value === null ) return
+        mediaStore.volumeOutput = soundVolume.value
+    })
 
     onMounted( () => {
 
-        enumerateDevices()
+        if( mediaStore.audioInputDevice !== null ) {
+            selectedAudioInput.value = mediaStore.audioInputDevice.label
+        } 
+        if( mediaStore.audioOutputDevice !== null ) {
+            selectedAudioOutput.value = mediaStore.audioOutputDevice.label
+        }
+        if( mediaStore.videoDevice !== null ) {
+            selectedVideoInput.value = mediaStore.videoDevice.label
+        }
 
+        // volume input
+
+        if( mediaStore.volumeOutput !== null ) {
+            soundVolume.value = mediaStore.volumeOutput
+        } else {
+            soundVolume.value = 0.5
+        }
+
+        enumerateDevices()
         
     })
         
