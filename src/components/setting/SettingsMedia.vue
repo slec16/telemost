@@ -46,14 +46,8 @@
             <div class="flex flex-row px-7">
                 <v-btn v-if="true" color="primary" class="mr-10">Проверить</v-btn>
                 <v-btn v-else class="mr-10">Воспроизвести</v-btn>
-                <!--TODO -->
-                <!-- полоска реагирующая на звук + возможность записи голоса и его прослушивания  -->
-                <v-slider
-                    v-model="sensitivityValue"
-                    color="green"
-                    min="0"
-                    max="1"
-                ></v-slider>
+
+                <MicrophoneLevel />
             </div>
         </div>
         <v-divider class="my-5"></v-divider>
@@ -97,6 +91,7 @@
 
 <script setup>
     import { ref, onMounted, watchEffect, useTemplateRef } from "vue"
+    import MicrophoneLevel from "./MicrophoneLevel.vue"
     import { useMediaStore } from "../../stores/media-store"
     import { throttle } from "../../utils/throttle"
     
