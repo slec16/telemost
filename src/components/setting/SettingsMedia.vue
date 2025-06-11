@@ -44,9 +44,7 @@
         <div>
             <p class="font-bold mb-5">Проверка микрофона</p>
             <div class="flex flex-row px-7">
-                <v-btn v-if="true" color="primary" class="mr-10">Проверить</v-btn>
-                <v-btn v-else class="mr-10">Воспроизвести</v-btn>
-
+                <MediaRecord />
                 <MicrophoneLevel />
             </div>
         </div>
@@ -92,6 +90,7 @@
 <script setup>
     import { ref, onMounted, watchEffect, useTemplateRef } from "vue"
     import MicrophoneLevel from "./MicrophoneLevel.vue"
+    import MediaRecord from "./MediaRecord.vue"
     import { useMediaStore } from "../../stores/media-store"
     import { throttle } from "../../utils/throttle"
     
@@ -125,16 +124,14 @@
 
     const checkVideoHandler = async () => {
         const stream = await getMediaStream( { audio: false, video: true } )
-        console.log(stream)
+        // console.log(stream)
             if (stream) {
             checkVideo.value = true
             videoRef.value.srcObject = stream
-            // Optionally, add event listeners for more control:
             videoRef.value.onloadedmetadata = () => {
-            videoRef.value.play() // Start playing the video
+            videoRef.value.play() 
             }
         } else {
-            // Handle the case where the stream could not be obtained, e.g., show an error message
             console.error("Failed to get stream.")
         }
     }
@@ -232,6 +229,7 @@
 
     // } 
 
+    // TODO: Убрать и перенестие все в mediarecorder здесь только сохранять в стору
     const setMicroVolume = async( value, selectedInputDevice ) => {
 
  
@@ -252,8 +250,8 @@
         const source = audioContext.createMediaStreamSource(stream)
         const gainNode = audioContext.createGain()
 
-        source.connect(gainNode); // Connect the source to the gain node
-        gainNode.connect(audioContext.destination); // Connect the gain node to the output (speakers)
+        source.connect(gainNode)
+        gainNode.connect(audioContext.destination) 
 
         gainNode.gain.value = value
 

@@ -16,10 +16,12 @@
 </template>
 
 <script setup>
-    import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+    import { ref, onMounted, onBeforeUnmount, computed, watchEffect } from 'vue'
     import { useMediaStore } from '../../stores/media-store';
 
     // const { audioInputDevice, microVoume } = defineProps( [ "audioInputDevice", "microVoume" ] )
+
+    //TODO менять источник
 
     const mediaStore = useMediaStore()
 
@@ -30,10 +32,9 @@
 
     const numRectangles = ref(0)
 
-    async function getMicrophoneStream() {
+    async function getMicrophoneStream( constraints ) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia( { audio: { deviceId: { exact: mediaStore.audioInputDevice.deviceId } }, video: false } )
-        console.log(stream)
+        const stream = await navigator.mediaDevices.getUserMedia( constraints )
         return stream
       } catch (error) {
         console.error("Error accessing microphone:", error)
@@ -41,30 +42,36 @@
       }
     }
 
-    async function setupAudioProcessing() {
-      const stream = await getMicrophoneStream()
+    async function setupAudioProcessing( constraints, microVolume ) {
+        const stream = await getMicrophoneStream( constraints )
 
-      if (!stream) {
-        return
-      }
+        if (!stream) {
+            return
+        }
 
-      audioContext = new AudioContext
-      const source = audioContext.createMediaStreamSource(stream)
+        audioContext = new AudioContext
+        const source = audioContext.createMediaStreamSource( stream )
+        const gainNode = audioContext.createGain()
 
-      analyser = audioContext.createAnalyser()
-      analyser.fftSize = 2048
 
-      source.connect(analyser)
+        analyser = audioContext.createAnalyser()
+        analyser.fftSize = 2048
+
+        source.connect(analyser)
+        source.connect(gainNode)
+        // gainNode.connect(audioContext.destination)
+
+        gainNode.gain.value = microVolume
     }
 
     function getVolumeLevel() {
       const bufferLength = analyser.frequencyBinCount
-      const dataArray = new Uint8Array(bufferLength)
-      analyser.getByteTimeDomainData(dataArray)
+      const dataArray = new Uint8Array( bufferLength )
+      analyser.getByteTimeDomainData( dataArray )
 
       let volume = 0
       for (let i = 0; i < bufferLength; i++) {
-        volume += Math.abs(dataArray[i] - 128) // Считаем абсолютное значение отклонения от 128
+        volume += Math.abs( dataArray[i] - 128 ) // Считаем абсолютное значение отклонения от 128
       }
 
       volume /= bufferLength;
@@ -74,11 +81,11 @@
     }
 
     function updateVolumeLevel() {
-      if (analyser) {
+      if ( analyser ) {
         volumeLevel.value = getVolumeLevel(); // Обновляем уровень громкости
         // volumeLevel.value = volumeLevel.value*100
       }
-      animationFrameId = requestAnimationFrame(updateVolumeLevel); // Запрашиваем следующий кадр анимации
+      animationFrameId = requestAnimationFrame( updateVolumeLevel ); // Запрашиваем следующий кадр анимации
     }
 
     // настройка шкалы
@@ -99,10 +106,14 @@
       }
     }
 
+    watchEffect(() => {
+        setupAudioProcessing({ audio: { deviceId: { exact: mediaStore.audioInputDevice.deviceId } }, video: false }, mediaStore.volumeInput )
+    })
+
     onMounted(async() => {
         updateNumRectangles()
         window.addEventListener('resize', updateNumRectangles)
-        await setupAudioProcessing()
+        await setupAudioProcessing( { audio: { deviceId: { exact: mediaStore.audioInputDevice.deviceId } }, video: false }, mediaStore.volumeInput )
         if (analyser) {
             updateVolumeLevel() // Запускаем анимацию
         } else {
