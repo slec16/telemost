@@ -43,25 +43,25 @@
     }
 
     async function setupAudioProcessing( constraints, microVolume ) {
-        const stream = await getMicrophoneStream( constraints )
+      const stream = await getMicrophoneStream( constraints )
 
-        if (!stream) {
-            return
-        }
+      if (!stream) {
+          return
+      }
 
-        audioContext = new AudioContext
-        const source = audioContext.createMediaStreamSource( stream )
-        const gainNode = audioContext.createGain()
+      audioContext = new AudioContext
+      const source = audioContext.createMediaStreamSource( stream )
+      const gainNode = audioContext.createGain()
 
 
-        analyser = audioContext.createAnalyser()
-        analyser.fftSize = 2048
+      analyser = audioContext.createAnalyser()
+      analyser.fftSize = 2048
 
-        source.connect(analyser)
-        source.connect(gainNode)
-        // gainNode.connect(audioContext.destination)
+      source.connect(analyser)
+      source.connect(gainNode)
+      // gainNode.connect(audioContext.destination)
 
-        gainNode.gain.value = microVolume
+      gainNode.gain.value = microVolume
     }
 
     function getVolumeLevel() {
@@ -107,7 +107,7 @@
     }
 
     watchEffect(() => {
-        setupAudioProcessing({ audio: { deviceId: { exact: mediaStore.audioInputDevice.deviceId } }, video: false }, mediaStore.volumeInput )
+      setupAudioProcessing({ audio: { deviceId: { exact: mediaStore.audioInputDevice.deviceId } }, video: false }, mediaStore.volumeInput )
     })
 
     onMounted(async() => {

@@ -45,7 +45,7 @@
             <p class="font-bold mb-5">Проверка микрофона</p>
             <div class="flex flex-row px-7">
                 <MediaRecord />
-                <MicrophoneLevel />
+                <!-- <MicrophoneLevel /> -->
             </div>
         </div>
         <v-divider class="my-5"></v-divider>
@@ -104,8 +104,6 @@
 
     const microVolume = ref(null)
     const soundVolume = ref(null)
-
-    const sensitivityValue = ref(0.75)
 
     const audioInputDevices = ref([])
     const audioInputLabels = ref([])
